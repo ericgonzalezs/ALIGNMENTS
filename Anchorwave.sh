@@ -18,7 +18,7 @@ minimap2 -x splice -t 10 -k 12 -a -p 0.4 -N 20 ANN1372_HAP1_hap1.reviewed.chr_as
 
 minimap2 -x splice -t 10 -k 12 -a -p 0.4 -N 20 ANN1372_HAP2_hap2.reviewed.chr_assembled.fasta refH2.cds.fa > refH2.sam
 
-
+##################################
 #Alignment
 
 #!/bin/bash
@@ -38,7 +38,33 @@ minimap2 -x splice -t 10 -k 12 -a -p 0.4 -N 20 $i refH1.cds.fa >  "$name"".sam"
 
 anchorwave proali -i ANN1372H1_V3_corrected_mincov90_minID90.PANNEW76k.gmap.gff3 -r ANN1372_V3_corrected_hap1.reviewed.chr_assembled.fasta -a "$name"".sam" -as refH1.cds.fa -ar refH1.sam -s $i -n "$name""_vs_ANN1372_HAP1.anchors" -o "$name""_vs_ANN1372_HAP1_anchorwave.maf" -t 9 -R 1 -Q 1 -f "$name""_vs_ANN1372_HAP1_anchorwave.f.maf"  >  "$name""_vs_ANN1372_HAP1_anchorwave.log"
 
+#######################################
+#convert maf to table
+#!/bin/bash
+#SBATCH --account=def-rieseber
+#SBATCH --time=3-0
+#SBATCH --mem=50G
 
+module load StdEnv/2020 python/2.7.18
+i=$(ls *anchorwave.maf | head -n 1 | tail -n 1)
+
+name=$(echo $i | cut -d "." -f 1)
+
+python2 /home/egonza02/scratch/SOFTWARE/ANCHORWAVE/anchorwave/scripts/maf-convert tab $i  > "$name"".tab"
+#you have to download maf-convert from here https://gitlab.com/mcfrith/last/-/blob/main/bin/maf-convert
+
+#################################################
+#convert table to the format to plot
+for i in $(ls *anchorwave.tab)
+do
+       name=$(echo $i | cut -d "." -f 1 )
+
+       grep -v "#" $i | awk -F "\t" -v OFS="\t" '{print $3, $3 + $4, $8, $8 + $9, 30, $7, $2, $10}' > "$name""_tab_fp.txt"
+
+done
+
+
+##################################################
 #PLOT RUN_PLOTS_Per_Chr_allchr.R
 library(dplyr)
 library(magrittr)
@@ -238,7 +264,7 @@ print(P1)
 dev.off()
 
 
-
+###############################################################
 #How to run it
 
 module load StdEnv/2020  r/4.1.2
