@@ -356,6 +356,9 @@ do
 
 done
 
+#some times, these plots per chromosome are weird regarding the colour. Please always check the tables "$name""MQ30_tab.txt" to be sure 
+#the colour make sense regarding the %ID in the tables
+
 ##########################
 EL FIN
 ##########################
